@@ -53,7 +53,7 @@ function buildVideoStreamSources(filePath, quality = 'medium', volume = 100) {
       input: `ffmpeg -re -i "${filePath}" ${volFilter} -f s16le -ac 1 -ar 48000 pipe:1`.replace(/\s+/g, ' ').trim(),
       sampleRate:   48000,
       channelCount: 1,
-      keepOpen:     false,
+      keepOpen:     true,
     },
     camera: {
       mediaSource: 4,
@@ -61,7 +61,7 @@ function buildVideoStreamSources(filePath, quality = 'medium', volume = 100) {
       width:    q.width,
       height:   q.height,
       fps:      q.fps,
-      keepOpen: false,
+      keepOpen: true,
     },
   };
 }

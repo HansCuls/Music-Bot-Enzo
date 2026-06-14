@@ -132,7 +132,7 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
         input: buildAudioCmd(filePath, volume, 0),
         sampleRate: 48000,
         channelCount: 1,
-        keepOpen: false,
+        keepOpen: true,
       },
     });
 
@@ -178,7 +178,7 @@ async function seekStream(client, chatId, seconds, callbacks = {}) {
       input: buildAudioCmd(s.filePath, s.volume, seconds),
       sampleRate: 48000,
       channelCount: 1,
-      keepOpen: false,
+      keepOpen: true,
     },
   });
 
