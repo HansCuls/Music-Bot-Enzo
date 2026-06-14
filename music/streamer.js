@@ -68,7 +68,7 @@ function buildAudioCmd(filePath, volume = 100, seekSeconds = 0) {
   const vol     = Math.max(0, Math.min(200, volume)) / 100;
   const seekArg = seekSeconds > 0 ? `-ss ${seekSeconds}` : '';
   const volArg  = vol !== 1.0 ? `-af "volume=${vol}"` : '';
-  return `ffmpeg ${seekArg} -re -i "${filePath}" ${volArg} -f s16le -ac 2 -ar 48000 pipe:1`.replace(/\s+/g, ' ').trim();
+  return `ffmpeg ${seekArg} -re -i "${filePath}" ${volArg} -f s16le -ac 1 -ar 48000 pipe:1`.replace(/\s+/g, ' ').trim();
 }
 // Legacy alias
 const buildFfmpegCmd = buildAudioCmd;
@@ -131,7 +131,8 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
         mediaSource: 4,
         input: buildAudioCmd(filePath, volume, 0),
         sampleRate: 48000,
-        channelCount: 2,
+        channelCount: 1,
+        keepOpen: false,
       },
     });
 
@@ -176,7 +177,8 @@ async function seekStream(client, chatId, seconds, callbacks = {}) {
       mediaSource: 4,
       input: buildAudioCmd(s.filePath, s.volume, seconds),
       sampleRate: 48000,
-      channelCount: 2,
+      channelCount: 1,
+      keepOpen: false,
     },
   });
 

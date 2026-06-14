@@ -50,16 +50,18 @@ function buildVideoStreamSources(filePath, quality = 'medium', volume = 100) {
   return {
     microphone: {
       mediaSource: 4,
-      input: `ffmpeg -re -i "${filePath}" ${volFilter} -f s16le -ac 2 -ar 48000 pipe:1`.replace(/\s+/g, ' ').trim(),
+      input: `ffmpeg -re -i "${filePath}" ${volFilter} -f s16le -ac 1 -ar 48000 pipe:1`.replace(/\s+/g, ' ').trim(),
       sampleRate:   48000,
-      channelCount: 2,
+      channelCount: 1,
+      keepOpen:     false,
     },
     camera: {
       mediaSource: 4,
       input: `ffmpeg -re -i "${filePath}" -vf scale=${q.width}:${q.height} -f rawvideo -pix_fmt yuv420p -r ${q.fps} pipe:1`.replace(/\s+/g, ' ').trim(),
-      width:  q.width,
-      height: q.height,
-      fps:    q.fps,
+      width:    q.width,
+      height:   q.height,
+      fps:      q.fps,
+      keepOpen: false,
     },
   };
 }
