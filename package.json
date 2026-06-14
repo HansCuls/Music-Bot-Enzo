@@ -10,9 +10,9 @@
   "dependencies": {
     "telegraf": "^4.16.3",
     "teleproto": "^1.0.0",
-    "@arnabxd/ntgcalls-napi": "^1.0.0",
-    "youtube-sr": "^4.3.11",
-    "@vreden/youtube_scraper": "^1.2.0"
+    "@arnabxd/ntgcalls-napi": "github:ArnabXD/ntgcalls-napi",
+    "youtube-sr": "*",
+    "@vreden/youtube_scraper": "*"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
