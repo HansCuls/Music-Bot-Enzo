@@ -113,12 +113,8 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
   stopStream(chatId);
 
   // Download dulu
-  let filePath;
-  try {
-    filePath = await downloadToCache(audioUrl, videoId);
-  } catch (e) {
-    throw new Error(`Gagal download audio: ${e.message}`);
-  }
+  // Stream langsung dari URL, cache di background
+  downloadToCache(audioUrl, videoId).catch(() => {});
 
   try {
     const ntg      = new NtgCalls();
@@ -129,7 +125,7 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
     await ntg.set_stream_sources(Number(chatId), 0, {
       microphone: {
         mediaSource: 4,
-        input: buildAudioCmd(filePath, volume, 0),
+        input: buildAudioCmd(audioUrl, volume, 0),
         sampleRate: 48000,
         channelCount: 1,
         keepOpen: true,
@@ -175,7 +171,7 @@ async function seekStream(client, chatId, seconds, callbacks = {}) {
   await ntg.set_stream_sources(Number(chatId), 0, {
     microphone: {
       mediaSource: 4,
-      input: buildAudioCmd(s.filePath, s.volume, seconds),
+      input: buildAudioCmd(s.audioUrl, s.volume, seconds),
       sampleRate: 48000,
       channelCount: 1,
       keepOpen: true,
