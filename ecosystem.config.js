@@ -19,7 +19,7 @@ module.exports = {
       restart_delay:    3000,          // tunggu 3 detik sebelum restart
 
       // ─── Memory limit ───────────────────
-      max_memory_restart: '512M',      // restart kalau memory > 512MB
+      //max_memory_restart: '512M',      // restart kalau memory > 512MB
 
       // ─── Logs ───────────────────────────
       log_date_format:  'YYYY-MM-DD HH:mm:ss',
