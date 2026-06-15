@@ -109,23 +109,23 @@ async function joinVoiceChat(client, chatId, offerSdp) {
 async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 100, videoId = null) {
   if (!ntgAvailable) throw new Error('ntgcalls-napi tidak tersedia.');
 
-  // Stop stream lama
   stopStream(chatId);
 
-  // Download dulu
-  // Stream langsung dari URL, cache di background
-  downloadToCache(audioUrl, videoId).catch(() => {});
+  // ✅ FIX: await and capture the file path
+  const filePath = await downloadToCache(audioUrl, videoId);
 
   try {
-    const ntg      = new NtgCalls();
-    const offerSdp = await ntg.create(Number(chatId));
-    const answerSdp= await joinVoiceChat(client, chatId, offerSdp);
+    const ntg       = new NtgCalls();
+    const offerSdp  = await ntg.create(Number(chatId));
+    const answerSdp = await joinVoiceChat(client, chatId, offerSdp);
 
     await ntg.connect(Number(chatId), answerSdp, false);
+    
+    // ✅ FIX: Use filePath (local file), NOT audioUrl
     await ntg.set_stream_sources(Number(chatId), 0, {
       microphone: {
         mediaSource: 4,
-        input: buildAudioCmd(audioUrl, volume, 0),
+        input: buildAudioCmd(filePath, volume, 0),  // ← LOCAL FILE PATH
         sampleRate: 48000,
         channelCount: 1,
         keepOpen: true,
@@ -138,12 +138,14 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
       if (callbacks.onFinish) callbacks.onFinish();
     });
 
+    // ✅ FIX: Store BOTH filePath and audioUrl
     sessions.set(String(chatId), {
       ntg,
-      filePath,
+      filePath,   // ← now defined
+      audioUrl,   // ← store for seekStream
       videoId,
       startedAt: Date.now(),
-      paused:    false,
+      paused: false,
       volume,
     });
 
@@ -156,7 +158,7 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
   }
 }
 
-// ─── Seek (restart dari posisi tertentu) ───
+// Also fix seekStream to use filePath instead of audioUrl
 async function seekStream(client, chatId, seconds, callbacks = {}) {
   const s = getSession(chatId);
   if (!s) throw new Error('Tidak ada stream aktif.');
@@ -171,7 +173,7 @@ async function seekStream(client, chatId, seconds, callbacks = {}) {
   await ntg.set_stream_sources(Number(chatId), 0, {
     microphone: {
       mediaSource: 4,
-      input: buildAudioCmd(s.audioUrl, s.volume, seconds),
+      input: buildAudioCmd(s.filePath, s.volume, seconds),  // ← Use filePath, not audioUrl
       sampleRate: 48000,
       channelCount: 1,
       keepOpen: true,
@@ -184,9 +186,9 @@ async function seekStream(client, chatId, seconds, callbacks = {}) {
     if (callbacks.onFinish) callbacks.onFinish();
   });
 
-  s.ntg      = ntg;
-  s.startedAt= Date.now() - (seconds * 1000);
-  s.paused   = false;
+  s.ntg       = ntg;
+  s.startedAt = Date.now() - (seconds * 1000);
+  s.paused    = false;
   return true;
 }
 
