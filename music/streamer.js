@@ -65,10 +65,20 @@ async function downloadToCache(audioUrl, videoId) {
 
 // ─── Build ffmpeg command dari file lokal ──
 function buildAudioCmd(filePath, volume = 100, seekSeconds = 0) {
-  const vol     = Math.max(0, Math.min(200, volume)) / 100;
-  const seekArg = seekSeconds > 0 ? `-ss ${seekSeconds}` : '';
-  const volArg  = vol !== 1.0 ? `-af "volume=${vol}"` : '';
-  return `ffmpeg ${seekArg} -re -i "${filePath}" ${volArg} -f s16le -ac 1 -ar 48000 pipe:1`.replace(/\s+/g, ' ').trim();
+  const vol = Math.max(0, Math.min(200, volume)) / 100;
+
+  return [
+    'ffmpeg',
+    seekSeconds > 0 ? `-ss ${seekSeconds}` : '',
+    '-re',
+    `-i "${filePath}"`,
+    vol !== 1 ? `-af "volume=${vol}"` : '',
+    '-vn',
+    '-f s16le',
+    '-ar 48000',
+    '-ac 1',
+    '-'
+  ].filter(Boolean).join(' ');
 }
 // Legacy alias
 const buildFfmpegCmd = buildAudioCmd;
@@ -124,11 +134,11 @@ async function startStream(client, chatId, audioUrl, callbacks = {}, volume = 10
     // ✅ FIX: Use filePath (local file), NOT audioUrl
     await ntg.set_stream_sources(Number(chatId), 0, {
       microphone: {
-        mediaSource: 4,
+        mediaSource: 2,
         input: buildAudioCmd(filePath, volume, 0),  // ← LOCAL FILE PATH
         sampleRate: 48000,
         channelCount: 1,
-        keepOpen: true,
+        keepOpen: false,
       },
     });
 
@@ -172,11 +182,11 @@ async function seekStream(client, chatId, seconds, callbacks = {}) {
   await ntg.connect(Number(chatId), answerSdp, false);
   await ntg.set_stream_sources(Number(chatId), 0, {
     microphone: {
-      mediaSource: 4,
+      mediaSource: 2,
       input: buildAudioCmd(s.filePath, s.volume, seconds),  // ← Use filePath, not audioUrl
       sampleRate: 48000,
       channelCount: 1,
-      keepOpen: true,
+      keepOpen: false,
     },
   });
 
