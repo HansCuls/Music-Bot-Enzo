@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "telegraf": "^4.16.3",
-    "teleproto": "^1.0.0",
+    "teleproto": "latest",
     "@arnabxd/ntgcalls-napi": "*",
     "youtube-sr": "*",
     "@vreden/youtube_scraper": "*"
